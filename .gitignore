@@ -1,0 +1,9 @@
+**/.vscode/
+**/.idea/
+
+/bin/
+*.o
+*.a
+*.so
+*.dll
+*.exe

@@ -87,7 +87,7 @@ make clean       # remove os binários de bin/
 
 ---
 
-Kaua Souza - [@KauaSouzzaa](https://gitlab.com/KauaSouzzaa) - [kauas.morais@gmail.com](mailto:migueandrade@yahoo.com)   
+Kaua Souza - [@KauaSouzzaa](https://gitlab.com/KauaSouzzaa) - [kauas.morais@gmail.com](mailto:kauas.morais@gmail.com)   
 
 Miguel Andrade - [@migueandrade-ai](https://gitlab.com/migueandrade-ai) - [migueandrade@yahoo.com](mailto:migueandrade@yahoo.com)
 

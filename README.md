@@ -10,8 +10,6 @@ O MenuOps automatiza esse ciclo: a entrega do fornecedor é registrada como lote
 
 Para a especificação completa de requisitos, atores, serviços e critérios de aceitação, consulte o [DER](doc/DER_menuOPS.pdf).
 
-
-
 ## Instalação
 
 Pré-requisitos: `g++` com suporte a C++17, GNU `make` e `git`.
@@ -87,7 +85,14 @@ make clean       # remove os binários de bin/
 
 ## Meta
 
-Seu Nome – [@SeuNome](https://twitter.com/...) – [SeuEmail@exemplo.com](mailto:SeuEmail@exemplo.com)
+---
+
+Kaua Souza - [@KauaSouzzaa](https://gitlab.com/KauaSouzzaa) - [kauas.morais@gmail.com](mailto:migueandrade@yahoo.com)   
+Miguel Andrade - [@migueandrade-ai](https://gitlab.com/migueandrade-ai) - [migueandrade@yahoo.com](mailto:migueandrade@yahoo.com)
+Otávio Enrique Lopes de Lima - @OtavioEnrique - [otavio.e.lopes.lima@gmail.com](mailto:otavio.e.lopes.lima@gmail.com)   
+Yuri Henrique Reis - [@yuri4417](https://gitlab.com/yuri4417) - [yuri.henrique@aluno.ufop.edu.br](mailto:yuri.henrique@aluno.ufop.edu.br) 
+
+
 
 Projeto acadêmico, sem licença comercial. Veja `DER_menuOPS.pdf` para mais informações.
 

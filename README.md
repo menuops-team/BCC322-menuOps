@@ -88,8 +88,11 @@ make clean       # remove os binários de bin/
 ---
 
 Kaua Souza - [@KauaSouzzaa](https://gitlab.com/KauaSouzzaa) - [kauas.morais@gmail.com](mailto:migueandrade@yahoo.com)   
+
 Miguel Andrade - [@migueandrade-ai](https://gitlab.com/migueandrade-ai) - [migueandrade@yahoo.com](mailto:migueandrade@yahoo.com)
+
 Otávio Enrique Lopes de Lima - @OtavioEnrique - [otavio.e.lopes.lima@gmail.com](mailto:otavio.e.lopes.lima@gmail.com)   
+
 Yuri Henrique Reis - [@yuri4417](https://gitlab.com/yuri4417) - [yuri.henrique@aluno.ufop.edu.br](mailto:yuri.henrique@aluno.ufop.edu.br) 
 
 

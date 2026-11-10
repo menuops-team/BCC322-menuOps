@@ -7,6 +7,8 @@
 #include "Supplier.h"
 
 class Shipment {
+    friend class Burger;
+
 private:
     int id;
     int supplierId;

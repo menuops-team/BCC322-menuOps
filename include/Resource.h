@@ -4,6 +4,8 @@
 #include <string>
 
 class Resource {
+    friend class Burger;
+
 private:
     int id;
     std::string name;

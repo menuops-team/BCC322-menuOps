@@ -10,17 +10,23 @@ private:
     int nextBatchId;
 
 public:
+    explicit ResourceBatchServiceImpl(Burger& burger)
+        : burger(burger), nextBatchId(1) {}
+
     ResourceBatchServiceImpl(const ResourceBatchServiceImpl&) = delete;
     ResourceBatchServiceImpl& operator=(const ResourceBatchServiceImpl&) = delete;
     virtual ~ResourceBatchServiceImpl();
 
 
-    int create(const Resource& resource) override;
-    int create(const Supplier& supplier) override;
-    int create(const Shipment& shipment) override;
+    int createResource(const std::string& name,
+        const std::string& unit, double purchasePrice) override;
+    int createSupplier(const std::string& name, const std::string& cnpj,
+        const std::string& contact, const std::string& deliveryTerms) override;
+    int createShipment(int supplierId,
+        const Date& receiptDate) override;
 
-    void update(const Resource& resource) override;
-    void update(const Supplier& supplier) override;
+    void updateResource(const Resource& resource) override;
+    void updateSupplier(const Supplier& supplier) override;
 
     void deactivateResource(int resourceId) override;
     void deactivateSupplier(int supplierId) override;

@@ -2,6 +2,7 @@
 #ifndef BURGER_H
 #define BURGER_H
 
+#include <string>
 #include <vector>
 #include "Date.h"
 #include "Resource.h"
@@ -27,19 +28,23 @@ class Burger {
     void swap(Burger& other) noexcept;
 
     explicit Burger();
+    ~Burger();
 
 public:
-    // ---- Canonical form ----
+    // ---- Singleton access ----
     static Burger& createBurger();
 
-    Burger(const Burger& other);              // Deep copy
-    Burger& operator=(const Burger& other);   // Deep copy
-    virtual ~Burger();
+    Burger(const Burger& other) = delete;
+    Burger& operator=(const Burger& other) = delete;
+    Burger(Burger&& other) = delete;
+    Burger& operator=(Burger&& other) = delete;
 
-    // Creation: the root assigns IDs and owns the objects.
-    Resource& createResource(const Resource& model);
-    Supplier& createSupplier(const Supplier& model);
-    Shipment& createShipment(const Shipment& model);
+    // Static factories assign IDs and store the created objects in the
+    // canonical Burger instance returned by createBurger().
+    static Resource& createResource(const std::string& name, const std::string& unit, double purchasePrice);
+    static Supplier& createSupplier(const std::string& name, const std::string& cnpj,
+        const std::string& contact, const std::string& deliveryTerms);
+    static Shipment& createShipment(int supplierId, const Date& receiptDate);
 
     // Search: returns nullptr if not found.
     // The caller must not delete the returned pointer.

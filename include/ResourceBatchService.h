@@ -3,30 +3,33 @@
 
 #include <string>
 #include <vector>
-#include "../core/domain/Date.h"
-#include "../core/domain/BatchStatus.h"
-#include "../core/domain/Resource.h"
-#include "../core/domain/Supplier.h"
-#include "../core/domain/Shipment.h"
-#include "../core/domain/Batch.h"
+#include "Date.h"
+#include "BatchStatus.h"
+#include "Resource.h"
+#include "Supplier.h"
+#include "Shipment.h"
+#include "Batch.h"
 
 class ResourceBatchService {
 public:
     virtual ~ResourceBatchService() {}
 
     // ---- Resources ----
-    virtual int create(const Resource& resource) = 0; 
-    virtual void update(const Resource& resource) = 0;
+    virtual int createResource(const std::string& name, const std::string& unit,
+        double purchasePrice) = 0;
+    virtual void updateResource(const Resource& resource) = 0;
     virtual void deactivateResource(int resourceId) = 0;
     virtual void updatePurchasePrice(int resourceId, double price) = 0;
 
     // ---- Suppliers ----
-    virtual int create(const Supplier& supplier) = 0;
-    virtual void update(const Supplier& supplier) = 0;
+    virtual int createSupplier(const std::string& name, const std::string& cnpj,
+        const std::string& contact,const std::string& deliveryTerms) = 0;
+    virtual void updateSupplier(const Supplier& supplier) = 0;
     virtual void deactivateSupplier(int supplierId) = 0;
 
     // ---- Shipments and Batches ----
-    virtual int create(const Shipment& shipment) = 0;
+    virtual int createShipment(int supplierId,
+        const Date& receiptDate) = 0;
     virtual std::vector<int> openBatches(int shipmentId) = 0;
     virtual std::vector<Batch> getBatches() const = 0;
     virtual std::vector<Batch> getBatches(BatchStatus status) const = 0;

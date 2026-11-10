@@ -10,7 +10,7 @@ private:
 
 public:
     ShelfLifeTable();
-    ~ShelfLifeTable() = default;
+    virtual ~ShelfLifeTable() = default;
     ShelfLifeTable& operator=(const ShelfLifeTable& other);
 
     void setShelfLife(int resourceId, int days);

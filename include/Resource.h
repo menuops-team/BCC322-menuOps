@@ -4,6 +4,8 @@
 #include <string>
 
 class Resource {
+    friend class Burger;
+
 private:
     int id;
     std::string name;
@@ -11,12 +13,12 @@ private:
     double purchasePrice;
     bool active;
 
-public:
     Resource();
     Resource(int id, const std::string& name, const std::string& unit, double purchasePrice);
     Resource(const Resource& other);
+public:
     Resource& operator=(const Resource& other);
-    ~Resource();
+    virtual ~Resource();
 
     int getId() const;
     std::string getName() const;

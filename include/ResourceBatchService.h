@@ -3,12 +3,12 @@
 
 #include <string>
 #include <vector>
-#include "../core/domain/Date.h"
-#include "../core/domain/BatchStatus.h"
-#include "../core/domain/Resource.h"
-#include "../core/domain/Supplier.h"
-#include "../core/domain/Shipment.h"
-#include "../core/domain/Batch.h"
+#include "Date.h"
+#include "BatchStatus.h"
+#include "Resource.h"
+#include "Supplier.h"
+#include "Shipment.h"
+#include "Batch.h"
 
 class ResourceBatchService {
 public:

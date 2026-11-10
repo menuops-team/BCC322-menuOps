@@ -15,13 +15,13 @@ private:
 
     std::vector<int> resourceIds;
     std::vector<double> quantities;
-
-public:
+    
     Shipment();
     Shipment(int id, int supplierId, const Date& receiptDate);
     Shipment(const Shipment& other);
+public:
     Shipment& operator=(const Shipment& other);
-    ~Shipment();
+    virtual ~Shipment();
 
     int getId() const;
     int getSupplierId() const;

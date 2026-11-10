@@ -2,7 +2,7 @@
 #define RESOURCEBATCHSERVICEIMPL_H
 
 #include "ResourceBatchService.h"
-#include "../core/domain/Burger.h"
+#include "Burger.h"
 
 class ResourceBatchServiceImpl : public ResourceBatchService {
 private:
@@ -12,6 +12,7 @@ private:
 public:
     ResourceBatchServiceImpl(const ResourceBatchServiceImpl&) = delete;
     ResourceBatchServiceImpl& operator=(const ResourceBatchServiceImpl&) = delete;
+    virtual ~ResourceBatchServiceImpl();
 
 
     int create(const Resource& resource) override;

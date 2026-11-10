@@ -10,6 +10,7 @@ private:
 
 public:
     ShelfLifeTable();
+    ShelfLifeTable(const ShelfLifeTable& other);
     virtual ~ShelfLifeTable() = default;
     ShelfLifeTable& operator=(const ShelfLifeTable& other);
 

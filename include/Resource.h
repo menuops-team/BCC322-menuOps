@@ -4,19 +4,16 @@
 #include <string>
 
 class Resource {
-    friend class Burger;
-
 private:
     int id;
     std::string name;
     std::string unit;
     double purchasePrice;
     bool active;
-
-    Resource();
-    Resource(int id, const std::string& name, const std::string& unit, double purchasePrice);
-    Resource(const Resource& other);
 public:
+    Resource();
+    Resource(const Resource& other);
+    Resource(int id, const std::string& name, const std::string& unit, double purchasePrice);
     Resource& operator=(const Resource& other);
     virtual ~Resource();
 

@@ -2,18 +2,15 @@
 #ifndef BURGER_H
 #define BURGER_H
 
-#include <string>
 #include <vector>
-#include "Date.h"
-#include "Resource.h"
-#include "Supplier.h"
-#include "Shipment.h"
-#include "Batch.h"
 #include "ShelfLifeTable.h"
 #include "Inventory.h"
 
-// Domain root: the only class responsible for creating and destroying
-// resources, suppliers, and shipments. Inventory manages the batches.
+class Resource;
+class Supplier;
+class Shipment;
+
+// Domain root: stores resources, suppliers, shipments, and inventory state.
 class Burger {
 
     std::vector<Resource*> resourceList;
@@ -22,29 +19,20 @@ class Burger {
 
     Inventory generalInventory;
     ShelfLifeTable shelfLifeTable;
-    int nextId;
-
-    void release();
-    void swap(Burger& other) noexcept;
-
-    explicit Burger();
-    ~Burger();
 
 public:
-    // ---- Singleton access ----
-    static Burger& createBurger();
+    Burger();
+    ~Burger();
 
-    Burger(const Burger& other) = delete;
-    Burger& operator=(const Burger& other) = delete;
-    Burger(Burger&& other) = delete;
-    Burger& operator=(Burger&& other) = delete;
+    Burger(const Burger& other);
+    Burger& operator=(const Burger& other);
+    Burger(Burger&& other);
+    Burger& operator=(Burger&& other);
 
-    // Static factories assign IDs and store the created objects in the
-    // canonical Burger instance returned by createBurger().
-    static Resource& createResource(const std::string& name, const std::string& unit, double purchasePrice);
-    static Supplier& createSupplier(const std::string& name, const std::string& cnpj,
-        const std::string& contact, const std::string& deliveryTerms);
-    static Shipment& createShipment(int supplierId, const Date& receiptDate);
+    // Add operations store the objects in this Burger.
+    void addResource(Resource* resource);
+    void addSupplier(Supplier* supplier);
+    void addShipment(Shipment* shipment);
 
     // Search: returns nullptr if not found.
     // The caller must not delete the returned pointer.

@@ -7,6 +7,7 @@
 #include "Batch.h"
 
 class Burger;
+class Shipment;
 
 class ResourceBatchService {
 private:
@@ -29,6 +30,7 @@ public:
 
     // ---- Shipments and Batches ----
     int createShipment(int supplierId, const Date& receiptDate);
+    int createShipment(const Shipment& shipment);
     std::vector<int> openBatches(int shipmentId);
     std::vector<Batch> getPriorityBatches() const;
 };

@@ -11,16 +11,13 @@ private:
     std::string contact;
     std::string deliveryTerms;
     bool active;
-
 public:
     Supplier();
-    Supplier(int id, const std::string& name,
-             const std::string& cnpj,
-             const std::string& contact,
-             const std::string& deliveryTerms);
     Supplier(const Supplier& other);
+    Supplier(int id, const std::string& name, const std::string& cnpj,
+        const std::string& contact, const std::string& deliveryTerms);
     Supplier& operator=(const Supplier& other);
-    ~Supplier();
+    virtual ~Supplier();
 
     int getId() const;
     std::string getName() const;

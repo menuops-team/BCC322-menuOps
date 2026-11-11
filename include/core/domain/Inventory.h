@@ -12,7 +12,7 @@ public:
     Inventory();
     Inventory(const Inventory& other);
     Inventory& operator=(const Inventory& other);
-    virtual ~Inventory();
+    ~Inventory();
 
     void addBatch(const Batch& batch);
     bool removeBatch(int index);

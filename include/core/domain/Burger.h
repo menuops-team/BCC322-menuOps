@@ -3,14 +3,16 @@
 #define BURGER_H
 
 #include <vector>
+#include "Date.h"
+#include "Resource.h"
+#include "Supplier.h"
+#include "Shipment.h"
+#include "Batch.h"
 #include "ShelfLifeTable.h"
 #include "Inventory.h"
 
-class Resource;
-class Supplier;
-class Shipment;
-
-// Domain root: stores resources, suppliers, shipments, and inventory state.
+// Domain root: the only class responsible for creating and destroying
+// resources, suppliers, and shipments. Inventory manages the batches.
 class Burger {
 
     std::vector<Resource*> resourceList;
@@ -19,20 +21,25 @@ class Burger {
 
     Inventory generalInventory;
     ShelfLifeTable shelfLifeTable;
+    int nextId;
+
+    void release();
+    void swap(Burger& other) noexcept;
+
+    explicit Burger();
 
 public:
-    Burger();
-    ~Burger();
+    // ---- Canonical form ----
+    static Burger& createBurger();
 
-    Burger(const Burger& other);
-    Burger& operator=(const Burger& other);
-    Burger(Burger&& other);
-    Burger& operator=(Burger&& other);
+    Burger(const Burger& other);              // Deep copy
+    Burger& operator=(const Burger& other);   // Deep copy
+    virtual ~Burger();
 
-    // Add operations store the objects in this Burger.
-    void addResource(Resource* resource);
-    void addSupplier(Supplier* supplier);
-    void addShipment(Shipment* shipment);
+    // Creation: the root assigns IDs and owns the objects.
+    Resource& createResource(const Resource& model);
+    Supplier& createSupplier(const Supplier& model);
+    Shipment& createShipment(const Shipment& model);
 
     // Search: returns nullptr if not found.
     // The caller must not delete the returned pointer.

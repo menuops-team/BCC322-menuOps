@@ -12,8 +12,6 @@ ShelfLifeTable& ShelfLifeTable::operator=(const ShelfLifeTable& other) {
     return *this;
 }
 
-ShelfLifeTable::~ShelfLifeTable() = default;
-
 void ShelfLifeTable::setShelfLife(int resourceId, int days) {
     shelfLifeDays[resourceId] = days;
 }

@@ -4,11 +4,12 @@
 
 using namespace std;
 
-Resource::Resource(const Resource& other)
-    : id(other.id), name(other.name) {}
+Resource::Resource(const Resource& other) {
+   setId(other.getId());
+    setName(other.getName()); 
+}
 
-Resource::Resource(int id, const string& name)
-    : id(1), name("resource") {
+Resource::Resource(int id, const string& name) {
     setId(id);
     setName(name);
 }

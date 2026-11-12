@@ -22,7 +22,7 @@ public:
     ~ResourceBatchService();
 
     // ---- Resources ----
-    int createResource(const std::string& name, const std::string& unit, double purchasePrice);
+    int createResource(const std::string& name);
 
     // ---- Suppliers ----
     int createSupplier(const std::string& name, const std::string& cnpj,
@@ -33,6 +33,9 @@ public:
     int createShipment(const Shipment& shipment);
     std::vector<int> openBatches(int shipmentId);
     std::vector<Batch> getPriorityBatches() const;
+
+    void reevaluateBatchStatus(const Date& today);
+    bool acceptShipment(int shipmentId, const std::vector<double>& measuredQuantities);
 };
 
 #endif

@@ -1,7 +1,7 @@
-#include "../include/Burger.h"
-#include "../include/Resource.h"
-#include "../include/Supplier.h"
-#include "../include/Shipment.h"
+#include "Burger.h"
+#include "Resource.h"
+#include "Supplier.h"
+#include "Shipment.h"
 #include <utility>
 using namespace std;
 
@@ -29,7 +29,7 @@ T* searchObject(const vector<T*>& container, int id) {
 
 }
 
-Burger::Burger() {}
+Burger::Burger() : generalInventory(vector<Batch>()) {}
 
 Burger::~Burger() {
     vector<Resource*>::iterator resourceIt;

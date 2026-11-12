@@ -1,11 +1,14 @@
-#include "../include/ResourceBatchService.h"
-#include "../include/Burger.h"
-#include "../include/Resource.h"
-#include "../include/Supplier.h"
-#include "../include/Shipment.h"
+#include "ResourceBatchService.h"
+#include "Burger.h"
+#include "Resource.h"
+#include "Supplier.h"
+#include "Shipment.h"
 
 #include <algorithm>
+#include <cmath>
+#include <stdexcept>
 #include <iterator>
+#include <map>
 
 namespace {
 
@@ -37,6 +40,22 @@ Date addDays(const Date& date, int days) {
     return civilFromDays(daysFromCivil(date.getYear(), date.getMonth(), date.getDay()) + days);
 }
 
+// A batch is "near expiration" when it expires within this many days (counting from today).
+const int NEAR_EXPIRATION_DAYS = 3;
+
+// Resource no longer stores a price and Shipment only carries quantities, so there is
+// no purchase price to copy into a new batch yet.
+const double UNKNOWN_PURCHASE_PRICE = 0.0;
+
+// Largest difference (same unit as the quantity) still treated as "the same weight".
+const double QUANTITY_TOLERANCE = 1e-6;
+
+// Number of days from `from` to `to` (negative if `to` is before `from`).
+long daysBetween(const Date& from, const Date& to) {
+    return daysFromCivil(to.getYear(), to.getMonth(), to.getDay()) -
+           daysFromCivil(from.getYear(), from.getMonth(), from.getDay());
+}
+
 template <typename T>
 int nextId(const std::vector<T*>& list) {
     int maxId = 0;
@@ -51,53 +70,54 @@ int nextId(const std::vector<T*>& list) {
 
 // A batch can still be consumed (not expired, not depleted).
 bool isUsable(const Batch& b) {
-    return (b.getStatus() == BatchStatus::AVAILABLE ||
-            b.getStatus() == BatchStatus::NEAR_EXPIRATION) &&
-           b.getQuantity() > 0.0;
+    return (b.getStatus() == BatchStatus::AVAILABLE || b.getStatus() == BatchStatus::NEAR_EXPIRATION) && b.getQuantity() > 0.0;
 }
 
 // FEFO: first expired, first out. Ties are broken by id (oldest batch first).
 bool consumeBefore(const Batch& a, const Batch& b) {
-    if (a.getExpirationDate() < b.getExpirationDate()) 
-        return true;
-    if (b.getExpirationDate() < a.getExpirationDate()) 
-        return false;
+    if (a.getExpirationDate() < b.getExpirationDate()) return true;
+    if (b.getExpirationDate() < a.getExpirationDate()) return false;
     return a.getId() < b.getId();
 }
 
-}
+} 
 
 ResourceBatchService::~ResourceBatchService() {}
 
-// Returns the new id, or -1 if the data is invalid.
-int ResourceBatchService::createResource(const std::string& name, const std::string& unit,double purchasePrice) {
-    if (name.empty() || unit.empty() || purchasePrice < 0.0) 
-        return -1;
+// Returns the new id. Throws std::runtime_error if the name is empty/blank or already exists.
+int ResourceBatchService::createResource(const std::string& name) {
+    if (name.find_first_not_of(" \t\n\r\f\v") == std::string::npos) {
+        throw std::runtime_error("Invalid resource data.");
+    }
 
     // Rejects a duplicated name.
     const std::vector<Resource*>& resources = burger.getResources();
     std::vector<Resource*>::const_iterator it;
     for (it = resources.begin(); it != resources.end(); ++it) {
-        if ((*it)->getName() == name) return -1;
+        if ((*it)->getName() == name) {
+            throw std::runtime_error("Resource already exists.");
+        }
     }
 
     const int id = nextId(resources);
-    Resource* resource = new Resource(id, name, unit, purchasePrice);
-    resource->setActive(true);
-    burger.addResource(resource);
+    burger.addResource(new Resource(id, name));
     return id;
 }
 
-// Returns the new id, or -1 if the data is invalid or the CNPJ is already registered.
-int ResourceBatchService::createSupplier(const std::string& name, const std::string& cnpj, const std::string& contact, const std::string& deliveryTerms) {
-    if (name.empty() || cnpj.empty()) 
-        return -1;
+// Returns the new id. Throws std::runtime_error if the data is invalid or the CNPJ is already registered.
+int ResourceBatchService::createSupplier(const std::string& name, const std::string& cnpj,
+                                         const std::string& contact,
+                                         const std::string& deliveryTerms) {
+    if (name.empty() || cnpj.empty()) {
+        throw std::runtime_error("Invalid supplier data.");
+    }
 
     const std::vector<Supplier*>& suppliers = burger.getSuppliers();
     std::vector<Supplier*>::const_iterator it;
     for (it = suppliers.begin(); it != suppliers.end(); ++it) {
-        if ((*it)->getCnpj() == cnpj)
-            return -1;
+        if ((*it)->getCnpj() == cnpj) {
+            throw std::runtime_error("Supplier already exists.");
+        }
     }
 
     const int id = nextId(suppliers);
@@ -107,11 +127,15 @@ int ResourceBatchService::createSupplier(const std::string& name, const std::str
     return id;
 }
 
-// Returns the new id, or -1 if the supplier does not exist/is inactive or the date is invalid.
+// Returns the new id. Throws std::runtime_error if the supplier does not exist/is inactive or the date is invalid.
 int ResourceBatchService::createShipment(int supplierId, const Date& receiptDate) {
     const Supplier* supplier = burger.searchSupplier(supplierId);
-    if (supplier == nullptr || !supplier->isActive()) return -1;
-    if (!receiptDate.isValid()) return -1;
+    if (supplier == nullptr) 
+        throw std::runtime_error("Supplier not found.");
+    if (!supplier->isActive()) 
+        throw std::runtime_error("Supplier is inactive.");
+    if (!receiptDate.isValid()) 
+        throw std::runtime_error("Invalid receipt date.");
 
     const int id = nextId(burger.getShipments());
     Shipment* shipment = new Shipment(id, supplierId, receiptDate);
@@ -122,25 +146,27 @@ int ResourceBatchService::createShipment(int supplierId, const Date& receiptDate
 
 // Registers a shipment built by the caller (resources already added to it).
 // The service assigns the id (the one inside `shipment` is ignored) and keeps its own copy.
-// Returns the new id, or -1 if the supplier does not exist/is inactive, the date is invalid,
-// or any item refers to an unknown resource or has a non-positive quantity.
+// Returns the new id. Throws std::runtime_error if the supplier does not exist/is inactive,
+// the date is invalid, or any item refers to an unknown resource or has a non-positive quantity.
+// Nothing is stored when it throws.
 int ResourceBatchService::createShipment(const Shipment& shipment) {
     const Supplier* supplier = burger.searchSupplier(shipment.getSupplierId());
-    if (supplier == nullptr || !supplier->isActive()) 
-        return -1;
+    if (supplier == nullptr) 
+        throw std::runtime_error("Supplier not found.");
+    if (!supplier->isActive()) 
+        throw std::runtime_error("Supplier is inactive.");
     if (!shipment.getReceiptDate().isValid()) 
-        return -1;
+        throw std::runtime_error("Invalid receipt date.");
 
-    const std::vector<int>& resourceIds = shipment.getResourceIds();
-    const std::vector<double>& quantities = shipment.getQuantities();
-    if (resourceIds.size() != quantities.size()) 
-        return -1;
-
-    std::vector<int>::const_iterator rit = resourceIds.begin();
-    std::vector<double>::const_iterator qit = quantities.begin();
-    for (; rit != resourceIds.end() && qit != quantities.end(); ++rit, ++qit) {
-        if (burger.searchResource(*rit) == nullptr || *qit <= 0.0) 
-            return -1;
+    const std::map<int, double>& items = shipment.getResources();
+    std::map<int, double>::const_iterator it;
+    for (it = items.begin(); it != items.end(); ++it) {
+        if (burger.searchResource(it->first) == nullptr) {
+            throw std::runtime_error("Resource not found.");
+        }
+        if (it->second <= 0.0) {
+            throw std::runtime_error("Invalid shipment items.");
+        }
     }
 
     Shipment* copy = new Shipment(shipment);
@@ -150,15 +176,38 @@ int ResourceBatchService::createShipment(const Shipment& shipment) {
     return id;
 }
 
+// Inspection of a received shipment: every measured quantity must match the declared one.
+bool ResourceBatchService::acceptShipment(int shipmentId,
+                                          const std::vector<double>& measuredQuantities) {
+    Shipment* shipment = burger.searchShipment(shipmentId);
+    if (shipment == nullptr || shipment->isAccepted()) return false;
+
+    // The map is ordered by resource id, so measuredQuantities follows that same order.
+    const std::map<int, double>& declared = shipment->getResources();
+    if (declared.empty() || declared.size() != measuredQuantities.size()) return false;
+
+    std::map<int, double>::const_iterator dit = declared.begin();
+    std::vector<double>::const_iterator mit = measuredQuantities.begin();
+    for (; dit != declared.end() && mit != measuredQuantities.end(); ++dit, ++mit) {
+        if (std::fabs(dit->second - *mit) > QUANTITY_TOLERANCE) return false;
+    }
+
+    shipment->setAccepted(true);
+    return true;
+}
+
 // Opens one batch per shipment item: expiration = receipt date + shelf life of the resource.
 // All-or-nothing: if any item is invalid, nothing is created and an empty vector is returned.
-// The shipment must have passed the inspection (accepted) and can only be opened once.
+// The shipment must have passed the inspection (acceptShipment), otherwise std::runtime_error is
+// thrown. It can only be opened once.
 std::vector<int> ResourceBatchService::openBatches(int shipmentId) {
     std::vector<int> ids;
 
     Shipment* shipment = burger.searchShipment(shipmentId);
-    if (shipment == nullptr || !shipment->isAccepted()) 
-        return ids;
+    if (shipment == nullptr) return ids;
+    if (!shipment->isAccepted()) {
+        throw std::runtime_error("Shipment has not been accepted.");
+    }
 
     const std::vector<Batch>& existing = burger.getInventory().getBatches();
     std::vector<Batch>::const_iterator bit;
@@ -166,48 +215,66 @@ std::vector<int> ResourceBatchService::openBatches(int shipmentId) {
         if (bit->getShipmentId() == shipmentId) return ids;
     }
 
-    const std::vector<int>& resourceIds = shipment->getResourceIds();
-    const std::vector<double>& quantities = shipment->getQuantities();
-    if (resourceIds.empty() || resourceIds.size() != quantities.size()) 
-        return ids;
+    const std::map<int, double>& items = shipment->getResources();
+    if (items.empty()) return ids;
 
     const Date receipt = shipment->getReceiptDate();
     const ShelfLifeTable& table = burger.getShelfLifeTable();
 
-    //validate everything before changing any state.
-    std::vector<int>::const_iterator rit = resourceIds.begin();
-    std::vector<double>::const_iterator qit = quantities.begin();
-    for (; rit != resourceIds.end() && qit != quantities.end(); ++rit, ++qit) {
-        const Resource* resource = burger.searchResource(*rit);
-        if (resource == nullptr || !resource->isActive()) 
-            return ids;
-        if (*qit <= 0.0) 
-            return ids;
-        if (!table.containsResource(*rit) || table.getShelfLife(*rit) <= 0) 
-            return ids;
+    // validates everything before changing any state.
+    std::map<int, double>::const_iterator it;
+    for (it = items.begin(); it != items.end(); ++it) {
+        const Resource* resource = burger.searchResource(it->first);
+        if (resource == nullptr) return ids;
+        if (it->second <= 0.0) return ids;
+        if (!table.containsResource(it->first) || table.getShelfLife(it->first) <= 0) return ids;
     }
 
-    //create the batches.
+    // builds the batches (Batch has no default constructor). Nothing is stored
+    // until every batch was built, so a failure here leaves the inventory untouched.
+    std::vector<Batch> created;
+    int batchId = nextBatchId;
+    for (it = items.begin(); it != items.end(); ++it) {
+        created.push_back(Batch(batchId++, it->first, shipmentId, it->second,
+                                UNKNOWN_PURCHASE_PRICE,
+                                addDays(receipt, table.getShelfLife(it->first)),
+                                BatchStatus::AVAILABLE));
+    }
+
     Inventory& inventory = burger.getInventory();
-    rit = resourceIds.begin();
-    qit = quantities.begin();
-    for (; rit != resourceIds.end() && qit != quantities.end(); ++rit, ++qit) {
-        const Resource* resource = burger.searchResource(*rit);
-
-        Batch batch;
-        batch.setId(nextBatchId++);
-        batch.setResourceId(*rit);
-        batch.setShipmentId(shipmentId);
-        batch.setQuantity(*qit);
-        batch.setPurchasePrice(resource->getPurchasePrice());
-        batch.setExpirationDate(addDays(receipt, table.getShelfLife(*rit)));
-        batch.setStatus(BatchStatus::AVAILABLE);
-
-        inventory.addBatch(batch);
-        ids.push_back(batch.getId());
+    std::vector<Batch>::const_iterator cit;
+    for (cit = created.begin(); cit != created.end(); ++cit) {
+        inventory.addBatch(*cit);
+        ids.push_back(cit->getId());
     }
+    nextBatchId = batchId;
 
     return ids;
+}
+
+// Recomputes the status of every batch for the given date:
+//   no quantity left                       -> DEPLETED
+//   expiration date before `today`          -> EXPIRED (a batch is still valid on its expiration date)
+//   expires within NEAR_EXPIRATION_DAYS     -> NEAR_EXPIRATION
+//   otherwise                               -> AVAILABLE
+void ResourceBatchService::reevaluateBatchStatus(const Date& today) {
+    if (!today.isValid()) return;
+
+    std::vector<Batch>& batches = burger.getInventory().getBatches();
+    std::vector<Batch>::iterator it;
+    for (it = batches.begin(); it != batches.end(); ++it) {
+        const long daysLeft = daysBetween(today, it->getExpirationDate());
+
+        if (it->getQuantity() <= 0.0) {
+            it->setStatus(BatchStatus::DEPLETED);
+        } else if (daysLeft < 0) {
+            it->setStatus(BatchStatus::EXPIRED);
+        } else if (daysLeft <= NEAR_EXPIRATION_DAYS) {
+            it->setStatus(BatchStatus::NEAR_EXPIRATION);
+        } else {
+            it->setStatus(BatchStatus::AVAILABLE);
+        }
+    }
 }
 
 // Batches that can still be used, ordered by expiration date (FEFO).

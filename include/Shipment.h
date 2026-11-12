@@ -1,7 +1,7 @@
  #ifndef SHIPMENT_H
 #define SHIPMENT_H
 
-#include <vector>
+#include <map>
 #include "Date.h"
 
 class Shipment {
@@ -11,14 +11,13 @@ private:
     Date receiptDate;
     bool accepted;
 
-    std::vector<int> resourceIds;
-    std::vector<double> quantities;
+    std::map<int, double> resources;
 public:
-    Shipment();
+    Shipment() = delete;
     Shipment(const Shipment& other);
     Shipment(int id, int supplierId, const Date& receiptDate);
     Shipment& operator=(const Shipment& other);
-    virtual ~Shipment();
+    virtual ~Shipment() = default;
 
     int getId() const;
     int getSupplierId() const;
@@ -31,9 +30,9 @@ public:
     void setAccepted(bool accepted);
 
     void addResource(int resourceId, double quantity);
+    bool removeResource(int resourceId);
 
-    const std::vector<int>& getResourceIds() const;
-    const std::vector<double>& getQuantities() const; 
+    const std::map<int, double>& getResources() const;
 };
 
 #endif

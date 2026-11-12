@@ -12,7 +12,7 @@ public:
     Date(int day, int month, int year);
     Date(const Date& other);
     Date& operator=(const Date& other);
-    virtual ~Date();
+    virtual ~Date() = default;
     
     int getDay() const;
     int getMonth() const;

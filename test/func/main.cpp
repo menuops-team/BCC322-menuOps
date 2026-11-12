@@ -7,5 +7,10 @@ int main() {
     testP3_registrarEntradaDeCarga();
     testP4_abrirLotes();
     testP5_lotesPrioritarios();
+    testA1_cadastrarInsumoDuplicado();
+    testA2_cadastrarFornecedorCNPJInvalido();
+    testA3_aceitarCargaComPesoDiferente();
+    testA4_abrirLotesCargaNaoAceita();
+    testA7_loteVencidoNaoAparece();
     return 0;
 }

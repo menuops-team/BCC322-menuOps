@@ -8,7 +8,7 @@ private:
     int year;
 
 public:
-    Date();
+    Date() = delete;
     Date(int day, int month, int year);
     Date(const Date& other);
     Date& operator=(const Date& other);

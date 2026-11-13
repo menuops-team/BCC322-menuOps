@@ -80,8 +80,11 @@ make clean       # remove os binários de bin/
 
 ## Histórico de lançamentos
 
-* 0.0.1
-  * Trabalho em andamento
+* **0.1.0 — Sprint 3**
+  * Implementação da estrutura inicial do sistema.
+  * Implementação das classes concretas.
+  * Adição dos testes funcionais.
+  * Configuração inicial de integração contínua (CI).
 
 ## Meta
 
@@ -91,7 +94,7 @@ Kaua Souza - [@KauaSouzzaa](https://gitlab.com/KauaSouzzaa) - [kauas.morais@gmai
 
 Miguel Andrade - [@migueandrade-ai](https://gitlab.com/migueandrade-ai) - [migueandrade@yahoo.com](mailto:migueandrade@yahoo.com)
 
-Otávio Enrique Lopes de Lima - @OtavioEnrique - [otavio.e.lopes.lima@gmail.com](mailto:otavio.e.lopes.lima@gmail.com)   
+Otávio Enrique Lopes de Lima - [@OtavioEnrique](https://gitlab.com/otavio.e.lopes.lima) - [otavio.e.lopes.lima@gmail.com](mailto:otavio.e.lopes.lima@gmail.com)   
 
 Yuri Henrique Reis - [@yuri4417](https://gitlab.com/yuri4417) - [yuri.henrique@aluno.ufop.edu.br](mailto:yuri.henrique@aluno.ufop.edu.br) 
 

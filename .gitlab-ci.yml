@@ -1,8 +1,18 @@
 stages:
   - build
+  - functional_test
+
 build:
   stage: build
   image: gcc:14
   script:
     - make clean
     - make build
+
+functional_tests:
+  stage: functional_test
+  image: gcc:14
+  script:
+    - make run_func
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "staging"'

@@ -9,10 +9,11 @@ private:
     std::vector<Batch> batches;
 
 public:
-    Inventory();
+    Inventory() = delete;
+    explicit Inventory(const std::vector<Batch>& batches);
     Inventory(const Inventory& other);
     Inventory& operator=(const Inventory& other);
-    ~Inventory();
+    virtual ~Inventory() = default;
 
     void addBatch(const Batch& batch);
     bool removeBatch(int index);

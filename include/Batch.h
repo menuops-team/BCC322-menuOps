@@ -15,7 +15,9 @@ private:
     BatchStatus status;
 
 public:
-    Batch();
+    Batch() = delete;
+    Batch(int id, int resourceId, int shipmentId, double quantity,
+          double purchasePrice, const Date& expirationDate, BatchStatus status);
     Batch(const Batch& other);
     Batch& operator=(const Batch& other);
     virtual ~Batch();
